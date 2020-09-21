@@ -9,8 +9,8 @@
         <module name="HomeWork" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="HomeWork" target="1.7" />
+    <bytecodeTargetLevel target="13">
+      <module name="HomeWork" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>

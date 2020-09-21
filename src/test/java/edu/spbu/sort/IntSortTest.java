@@ -46,6 +46,13 @@ public class IntSortTest
   }
 
   @Test
+  public void testSortArray_empty() {
+    int[] a = {}, b = {};
+    IntSort.sort(a);
+    assertTrue("Problems with an empty array", a != b);
+  }
+
+  @Test
   public void testSortList() throws Exception {
     int array[] = generateRandomIntArray(ARRAY_SIZE, SEED);
     List<Integer> list = new ArrayList<Integer>(ARRAY_SIZE);
