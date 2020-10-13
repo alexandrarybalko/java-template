@@ -10,10 +10,10 @@ import java.util.List;
 public class IntSort {
 
   public static void sort (int[] arr) {
-    if (arr.length != 0) qsort(arr, 0, arr.length - 1);
+    if (arr.length != 0) sort(arr, 0, arr.length - 1);
   }
 
-  public static void qsort (int[] arr, int left, int right) {
+  public static void sort (int[] arr, int left, int right) {
     int x = arr[(right + left)/2], t;
     int i = left, j = right;
     while (i <= j) {
@@ -26,8 +26,8 @@ public class IntSort {
         ++i; --j;
       }
     }
-    if (left < i - 1) qsort(arr, left, i - 1);
-    if (right > i) qsort(arr, i, right);
+    if (left < i - 1) sort(arr, left, i - 1);
+    if (right > i) sort(arr, i, right);
   }
 
   public static void sort (List<Integer> list) {

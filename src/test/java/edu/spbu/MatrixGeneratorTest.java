@@ -1,6 +1,8 @@
 package edu.spbu;
 
 import edu.spbu.MatrixGenerator;
+import edu.spbu.matrix.DenseMatrix;
+import edu.spbu.matrix.Matrix;
 import org.junit.After;
 import org.junit.Test;
 
@@ -37,5 +39,22 @@ public class MatrixGeneratorTest
     }
     assertTrue(emptyLineCount>1);
     assertEquals(10,lineCount);
+  }
+
+  @Test
+  public void testMulUnit() {
+    Matrix m3 = new DenseMatrix("m3.txt");
+    Matrix m4 = new DenseMatrix("m4.txt");
+    Matrix m = m3.mul(m4);
+    assertTrue(m3.equals(m));
+  }
+
+  @Test
+  public void testMul() {
+    Matrix m3 = new DenseMatrix("m3.txt");
+    Matrix m5 = new DenseMatrix("m5.txt");
+    Matrix m = m3.mul(m5);
+    Matrix m6 = new DenseMatrix("m6.txt");
+    assertTrue(m.equals(m6));
   }
 }

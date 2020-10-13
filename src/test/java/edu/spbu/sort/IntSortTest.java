@@ -47,9 +47,9 @@ public class IntSortTest
 
   @Test
   public void testSortArray_empty() {
-    int[] a = {}, b = {};
+    int[] a = {};
     IntSort.sort(a);
-    assertTrue("Problems with an empty array", a != b);
+    assertTrue("Problems with an empty array", a.length == 0);
   }
 
   @Test

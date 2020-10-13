@@ -20,4 +20,6 @@ public interface Matrix
    */
   Matrix dmul(Matrix o);
 
+  void print(String fileName);
+
 }
