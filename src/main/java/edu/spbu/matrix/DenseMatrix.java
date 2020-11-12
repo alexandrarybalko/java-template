@@ -7,8 +7,8 @@ import java.util.*;
  * Плотная матрица
  */
 public class DenseMatrix implements Matrix {
-    private int rows;
-    private int columns;
+    public int rows;
+    public int columns;
     public double[][] matrix;
 
     public static void main(String[] args) {
@@ -22,7 +22,7 @@ public class DenseMatrix implements Matrix {
      * @param fileName
      */
     public DenseMatrix(String fileName) {
-        int m = 1, n = 0;
+        int m = 1, n = 0; // m - columns, n - rows
         try (Scanner s = new Scanner(new FileReader(new File(fileName)))) {
             String str = s.nextLine();
             for (int k = 0; k < str.length(); ++k)
@@ -67,16 +67,16 @@ public class DenseMatrix implements Matrix {
      */
     @Override
     public Matrix mul(Matrix o) {
-        if (o instanceof DenseMatrix) {
-            DenseMatrix res = new DenseMatrix(new double[this.rows][((DenseMatrix) o).columns]);
-            try {
-                res = mul((DenseMatrix) o);
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
-            }
-            return res;
-        } else return null;
+        DenseMatrix res = new DenseMatrix(new double[this.rows][((DenseMatrix) o).columns]);
+        try {
+            if (o instanceof DenseMatrix) res = mul((DenseMatrix) o);
+            else res = mul((SparseMatrix) o);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        return res;
     }
+
 
     public DenseMatrix mul(DenseMatrix o) throws Exception {
         if (this.columns != o.rows) throw new Exception("These matrixes cannot be multiplied");
@@ -145,6 +145,32 @@ public class DenseMatrix implements Matrix {
         return new DenseMatrix(m);
     }
 
+    public DenseMatrix mul(SparseMatrix o) throws Exception {
+        if (this.columns != o.rows) throw new Exception("These matrixes cannot be multiplied");
+        double[][] res = new double[this.rows][o.columns];
+        SparseMatrix o_trans = o.transpose();
+        int[] count_o = new int[o_trans.rows]; // array of numbers of non-zero elements in each row in o_trans
+        for (int i = 0; i < o_trans.rows; ++i)
+            count_o[i] = 0;
+        for (int i = 0; i < o_trans.p_row.size(); ++i)
+            count_o[o_trans.p_row.get(i)] += 1;
+        int q = 0;
+        for (int j = 0; j < o.columns; ++j)
+            if (count_o[j] != 0) {
+                double s_prod = 0;
+                for (int i = 0; i < this.rows; ++i) {
+                    for (int k = q; k < q + count_o[j]; ++k)
+                        s_prod += o_trans.value.get(k) * this.matrix[i][o_trans.p_column.get(k)];
+                    res[i][j] = s_prod;
+                    s_prod = 0;
+                }
+                q += count_o[j];
+            }
+            else for (int i = 0; i < this.rows; ++i)
+                res[i][j] = 0;
+        return new DenseMatrix(res);
+    }
+
     /**
      * многопоточное умножение матриц
      *
@@ -166,7 +192,7 @@ public class DenseMatrix implements Matrix {
     public boolean equals(Object o) {
         if (o instanceof DenseMatrix)
             return this.equals((DenseMatrix) o);
-        else return false;
+        else return this.equals((SparseMatrix) o);
     }
 
     public boolean equals(DenseMatrix o) {
@@ -174,11 +200,32 @@ public class DenseMatrix implements Matrix {
             return false;
         else {
             int i = 0, j = 0;
-            boolean p = true;
-            for (; i < this.rows && p; ++i)
-                for (; j < o.columns && p; ++j)
-                    if (this.matrix[i][j] != o.matrix[i][j]) p = false;
-            return p;
+            for (; i < this.rows; ++i)
+                for (; j < o.columns; ++j)
+                    if (this.matrix[i][j] != o.matrix[i][j]) return false;
+            return true;
+        }
+    }
+
+    public boolean equals(SparseMatrix o) {
+        if (this.rows != o.rows && this.columns != o.columns)
+            return false;
+        else {
+            int p = 0;
+            for (int i = 0; i < this.rows; ++i)
+                for (int j = 0; j < this.columns; ++j)
+                    if (p < o.value.size()) {
+                        if (this.matrix[i][j] == 0) {
+                            if (i == o.p_row.get(p) && j == o.p_column.get(p))
+                                return false;
+                        } else {
+                            if (this.matrix[i][j] != o.value.get(p) || i != o.p_row.get(p) || j != o.p_column.get(p))
+                                return false;
+                            ++p;
+                        }
+                    }
+                    else if (this.matrix[i][j] != 0) return false;
+            return true;
         }
     }
 

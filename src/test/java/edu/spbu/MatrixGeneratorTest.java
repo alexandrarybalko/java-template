@@ -3,6 +3,7 @@ package edu.spbu;
 import edu.spbu.MatrixGenerator;
 import edu.spbu.matrix.DenseMatrix;
 import edu.spbu.matrix.Matrix;
+import edu.spbu.matrix.SparseMatrix;
 import org.junit.After;
 import org.junit.Test;
 
@@ -45,16 +46,51 @@ public class MatrixGeneratorTest
   public void testMulUnit() {
     Matrix m3 = new DenseMatrix("m3.txt");
     Matrix m4 = new DenseMatrix("m4.txt");
-    Matrix m = m3.mul(m4);
-    assertTrue(m3.equals(m));
+    assertEquals(m3, m3.mul(m4));
   }
 
   @Test
-  public void testMul() {
+  public void testMulDD() {
     Matrix m3 = new DenseMatrix("m3.txt");
     Matrix m5 = new DenseMatrix("m5.txt");
-    Matrix m = m3.mul(m5);
     Matrix m6 = new DenseMatrix("m6.txt");
-    assertTrue(m.equals(m6));
+    assertEquals(m3.mul(m5), m6);
+  }
+
+  @Test
+  public void testMulSS() {
+    Matrix m7 = new DenseMatrix("m7.txt");
+    Matrix m9 = new DenseMatrix("m9.txt");
+    assertEquals(m7.mul(m7), m9);
+  }
+
+ /* @Test
+  public void testNulDS() {
+    Matrix m7 = new SparseMatrix("m7.txt");
+    Matrix m8 = new DenseMatrix("m8.txt");
+    Matrix m11 = new DenseMatrix("m11.txt");
+    assertEquals((m8).mul(m7), m11);
+  } */
+
+  @Test
+  public void testNulSD() {
+    Matrix m7 = new SparseMatrix("m7.txt");
+    Matrix m8 = new DenseMatrix("m8.txt");
+    Matrix m10 = new DenseMatrix("m10.txt");
+    assertEquals(m7.mul(m8), m10);
+  }
+
+  @Test
+  public void equalsDS() {
+    Matrix m7 = new SparseMatrix("m7.txt");
+    Matrix m7_ = new DenseMatrix("m7.txt");
+    assertEquals(m7_, m7);
+  }
+
+  @Test
+  public void equalsSS() {
+    Matrix m7 = new SparseMatrix("m7.txt");
+    Matrix m7_ = new SparseMatrix("m7.txt");
+    assertEquals(m7_, m7);
   }
 }
