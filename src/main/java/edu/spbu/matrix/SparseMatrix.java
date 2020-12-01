@@ -16,10 +16,9 @@ public class SparseMatrix implements Matrix
   public int columns;
 
   public static void main(String[] args) {
-    DenseMatrix m7 = new DenseMatrix("m7.txt");
-    m7.print("print.txt");
-    SparseMatrix m7_ = new SparseMatrix("m7.txt");
-    System.out.println(m7_.equals(m7));
+    Matrix m7 = new SparseMatrix("m7.txt");
+    Matrix m9 = new SparseMatrix("m9.txt");
+    m7.dmul(m7).print("print.txt");
   }
 
   /**
@@ -149,7 +148,7 @@ public class SparseMatrix implements Matrix
     }
   }
 
-  private SparseMatrix mul(SparseMatrix o) throws Exception {
+  public SparseMatrix mul(SparseMatrix o) throws Exception {
     if (this.columns != o.rows) throw new Exception("These matrixes cannot be multiplied");
     ArrayList<Double> v = new ArrayList<>();
     ArrayList<Integer> r = new ArrayList<>();
@@ -184,7 +183,6 @@ public class SparseMatrix implements Matrix
               c.add(j);
             }
             q += count_o[j];
-            System.out.println(i + " " + j + " " + p + " " + q);
           }
         p += count_this[i];
         q = 0;
@@ -193,7 +191,7 @@ public class SparseMatrix implements Matrix
   }
 
 
-  private DenseMatrix mul(DenseMatrix o) throws Exception {
+  public DenseMatrix mul(DenseMatrix o) throws Exception {
     if (this.columns != o.rows) throw new Exception("These matrixes cannot be multiplied");
     double[][] res = new double[this.rows][o.columns];
     double[] zero_row = new double[o.columns];
@@ -226,9 +224,55 @@ public class SparseMatrix implements Matrix
    * @param o
    * @return
    */
-  @Override public Matrix dmul(Matrix o)
-  {
-    return null;
+  @Override public Matrix dmul(Matrix o) {
+    if (o instanceof DenseMatrix) {
+      DenseMatrix res = new DenseMatrix(new double[this.rows][((DenseMatrix) o).columns]);
+      try {
+        SparseDenseThread t1 = new SparseDenseThread(this, (DenseMatrix) o, res, 0, ((DenseMatrix) o).columns / 4 - 1);
+        SparseDenseThread t2 = new SparseDenseThread(this, (DenseMatrix) o, res, ((DenseMatrix) o).columns / 4, 2 * (((DenseMatrix) o).columns / 4) - 1);
+        SparseDenseThread t3 = new SparseDenseThread(this, (DenseMatrix) o, res, 2 * (((DenseMatrix) o).columns / 4), 3 * (((DenseMatrix) o).columns / 4) - 1);
+        SparseDenseThread t4 = new SparseDenseThread(this, (DenseMatrix) o, res, 3 * (((DenseMatrix) o).columns / 4), ((DenseMatrix) o).columns - 1);
+        t1.start();
+        t2.start();
+        t3.start();
+        t4.start();
+        t1.join();
+        t2.join();
+        t3.join();
+        t4.join();
+      } catch (Exception e) {
+        System.out.println(e.getMessage());
+      }
+      return res;
+    } else {
+      SparseMatrix res = new SparseMatrix(new ArrayList<Double>(), new ArrayList<Integer>(), new ArrayList<Integer>(), this.rows, ((SparseMatrix) o).columns);
+      try {
+        int[] arr = new int[this.rows]; //array of number of non-zero elements in each row in this
+        for (int i = 0; i < this.rows; ++i)
+          arr[i] = 0;
+        for (int i = 0; i < this.p_row.size(); ++i)
+          arr[this.p_row.get(i)] += 1;
+        int k = 0; //number of not empty rows
+        for (int i = 0; i < this.rows; ++i)
+          if (arr[i] != 0) ++k;
+        SparseSparseThread[] t = new SparseSparseThread[k];
+        int j = 0, p = 0;
+        for (int i = 0; i < this.rows; ++i) {
+          if (arr[i] != 0) {
+            t[j] = new SparseSparseThread(this, (SparseMatrix) o, res, p, p + arr[i] - 1);
+            p += arr[i];
+            ++j;
+          }
+        }
+        for (int i = 0; i < k; ++i)
+          t[i].start();
+        for (int i = 0; i < k; ++i)
+          t[i].join();
+      } catch (Exception e) {
+        System.out.println(e.getMessage());
+      }
+      return res;
+    }
   }
 
   /**

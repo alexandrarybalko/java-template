@@ -12,8 +12,10 @@ public class DenseMatrix implements Matrix {
     public double[][] matrix;
 
     public static void main(String[] args) {
-        Matrix m4 = new DenseMatrix("m4.txt");
-        m4.print("print.txt");
+        Matrix m7 = new SparseMatrix("m7.txt");
+        Matrix m8 = new DenseMatrix("m8.txt");
+        Matrix res = m8.dmul(m7);
+        res.print("print.txt");
     }
 
     /**
@@ -67,7 +69,9 @@ public class DenseMatrix implements Matrix {
      */
     @Override
     public Matrix mul(Matrix o) {
-        DenseMatrix res = new DenseMatrix(new double[this.rows][((DenseMatrix) o).columns]);
+        DenseMatrix res;
+        if (o instanceof DenseMatrix) res = new DenseMatrix(new double[this.rows][((DenseMatrix) o).columns]);
+        else res = new DenseMatrix(new double[this.rows][((SparseMatrix) o).columns]);
         try {
             if (o instanceof DenseMatrix) res = mul((DenseMatrix) o);
             else res = mul((SparseMatrix) o);
@@ -179,15 +183,50 @@ public class DenseMatrix implements Matrix {
      */
     @Override
     public Matrix dmul(Matrix o) {
-        return null;
+        DenseMatrix res;
+        if (o instanceof DenseMatrix) res = new DenseMatrix(new double[this.rows][((DenseMatrix) o).columns]);
+        else res = new DenseMatrix(new double[this.rows][((SparseMatrix) o).columns]);
+        try {
+            if (o instanceof DenseMatrix) {
+                DenseDenseThread t1 = new DenseDenseThread(this, (DenseMatrix) o, res, 0, res.rows / 2 - 1, 0, res.columns / 2 - 1); //upper left
+                DenseDenseThread t2 = new DenseDenseThread(this, (DenseMatrix) o, res, res.rows / 2, res.rows - 1, 0, res.columns / 2 - 1); //bottom left
+                DenseDenseThread t3 = new DenseDenseThread(this, (DenseMatrix) o, res, 0, res.rows / 2 - 1, res.columns / 2, res.columns - 1); //upper right
+                DenseDenseThread t4 = new DenseDenseThread(this, (DenseMatrix) o, res, res.rows / 2, res.rows - 1, res.columns / 2, res.columns - 1); //bottom right
+                t1.start();
+                t2.start();
+                t3.start();
+                t4.start();
+                t1.join();
+                t2.join();
+                t3.join();
+                t4.join();
+            }
+            else {
+                DenseSparseThread t1 = new DenseSparseThread(this, (SparseMatrix) o, res, 0, this.rows / 4 - 1);
+                DenseSparseThread t2 = new DenseSparseThread(this, (SparseMatrix) o, res, this.rows / 4, 2 * (this.rows / 4) - 1);
+                DenseSparseThread t3 = new DenseSparseThread(this, (SparseMatrix) o, res, 2 * (this.rows / 4), 3 * (this.rows / 4) - 1);
+                DenseSparseThread t4 = new DenseSparseThread(this, (SparseMatrix) o, res, 3 * (this.rows / 4), this.rows - 1);
+                t1.start();
+                t2.start();
+                t3.start();
+                t4.start();
+                t1.join();
+                t2.join();
+                t3.join();
+                t4.join();
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        return res;
     }
 
-    /**
-     * спавнивает с обоими вариантами
-     *
-     * @param o
-     * @return
-     */
+        /**
+         * спавнивает с обоими вариантами
+         *
+         * @param o
+         * @return
+         */
     @Override
     public boolean equals(Object o) {
         if (o instanceof DenseMatrix)
@@ -243,3 +282,4 @@ public class DenseMatrix implements Matrix {
         }
     }
 }
+

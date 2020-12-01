@@ -59,21 +59,21 @@ public class MatrixGeneratorTest
 
   @Test
   public void testMulSS() {
-    Matrix m7 = new DenseMatrix("m7.txt");
-    Matrix m9 = new DenseMatrix("m9.txt");
+    Matrix m7 = new SparseMatrix("m7.txt");
+    Matrix m9 = new SparseMatrix("m9.txt");
     assertEquals(m7.mul(m7), m9);
   }
 
- /* @Test
-  public void testNulDS() {
+  @Test
+  public void testMulDS() {
     Matrix m7 = new SparseMatrix("m7.txt");
     Matrix m8 = new DenseMatrix("m8.txt");
     Matrix m11 = new DenseMatrix("m11.txt");
     assertEquals((m8).mul(m7), m11);
-  } */
+  }
 
   @Test
-  public void testNulSD() {
+  public void testMulSD() {
     Matrix m7 = new SparseMatrix("m7.txt");
     Matrix m8 = new DenseMatrix("m8.txt");
     Matrix m10 = new DenseMatrix("m10.txt");
@@ -92,5 +92,44 @@ public class MatrixGeneratorTest
     Matrix m7 = new SparseMatrix("m7.txt");
     Matrix m7_ = new SparseMatrix("m7.txt");
     assertEquals(m7_, m7);
+  }
+
+  @Test
+  public void dmulDD() {
+    Matrix m3 = new DenseMatrix("m3.txt");
+    Matrix m5 = new DenseMatrix("m5.txt");
+    Matrix m6 = new DenseMatrix("m6.txt");
+    assertEquals(m3.dmul(m5), m6);
+  }
+
+  @Test
+  public void dmulDS() {
+    Matrix m7 = new SparseMatrix("m7.txt");
+    Matrix m8 = new DenseMatrix("m8.txt");
+    Matrix m11 = new DenseMatrix("m11.txt");
+    assertEquals((m8).dmul(m7), m11);
+  }
+
+  @Test
+  public void dmulSD() {
+    Matrix m7 = new SparseMatrix("m7.txt");
+    Matrix m8 = new DenseMatrix("m8.txt");
+    Matrix m10 = new DenseMatrix("m10.txt");
+    assertEquals(m7.dmul(m8), m10);
+  }
+
+  @Test
+  public void dmulSS() {
+    Matrix m7 = new SparseMatrix("m7.txt");
+    Matrix m9 = new SparseMatrix("m9.txt");
+    assertEquals(m7.dmul(m7), m9);
+  }
+
+  @Test
+  public void dmulSS2() {
+    Matrix m7 = new SparseMatrix("m7.txt");
+    Matrix m9 = new SparseMatrix("m9.txt");
+    Matrix m12 = new SparseMatrix("m12.txt");
+    assertEquals(m7.dmul(m9), m12);
   }
 }
