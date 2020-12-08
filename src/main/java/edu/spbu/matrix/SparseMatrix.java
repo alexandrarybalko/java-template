@@ -165,7 +165,7 @@ public class SparseMatrix implements Matrix
     for (int i = 0; i < o_trans.p_row.size(); ++i)
       count_o[o_trans.p_row.get(i)] += 1;
     int p = 0, q = 0;
-    for (int i = 0; i < this.rows; ++i)
+    for (int i = 0; i < this.rows; ++i) {
       if (count_this[i] != 0) {
         for (int j = 0; j < o_trans.rows; ++j)
           if (count_o[j] != 0) {
@@ -187,6 +187,7 @@ public class SparseMatrix implements Matrix
         p += count_this[i];
         q = 0;
       }
+    }
     return new SparseMatrix(v, r, c, this.rows, o.columns);
   }
 
@@ -257,19 +258,23 @@ public class SparseMatrix implements Matrix
           if (arr[i] != 0) ++k;
         SparseSparseThread[] t = new SparseSparseThread[k];
         int j = 0, p = 0;
-        for (int i = 0; i < this.rows; ++i) {
+        for (int i = 0; i < this.rows; ++i)
           if (arr[i] != 0) {
-            t[j] = new SparseSparseThread(this, (SparseMatrix) o, res, p, p + arr[i] - 1);
+            double[] r = new double[((SparseMatrix) o).columns];
+            t[j] = new SparseSparseThread(this, (SparseMatrix) o, r, p, p + arr[i] - 1);
+            t[j].start();
+            t[j].join();
+            for (int h = 0; h < r.length; ++h)
+              if (r[h] != 0) {
+                res.value.add(r[h]);
+                res.p_row.add(i);
+                res.p_column.add(h);
+              }
             p += arr[i];
             ++j;
           }
-        }
-        for (int i = 0; i < k; ++i)
-          t[i].start();
-        for (int i = 0; i < k; ++i)
-          t[i].join();
       } catch (Exception e) {
-        System.out.println(e.getMessage());
+        System.out.println(e.getMessage() + "!");
       }
       return res;
     }
